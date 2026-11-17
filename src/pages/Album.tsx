@@ -7,9 +7,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
+import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { Camera, Images, Plus, Trash2, Upload } from 'lucide-react';
+import { Camera, Images, Lock, Plus, Trash2, Upload } from 'lucide-react';
 import { ImageViewer, SectionCard, SmartImage, EmptyState } from '@/components/Common';
 import { services } from '@/services';
 import { useAppStore } from '@/store/useAppStore';
@@ -19,6 +20,7 @@ import type { Photo } from '@/types';
 /** 情侣相册：时间倒序照片墙、上传、大图预览与删除。 */
 export default function Album() {
   const couple = useAppStore((state) => state.couple);
+  const partner = useAppStore((state) => state.partner);
   const notify = useAppStore((state) => state.notify);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [viewer, setViewer] = useState<Photo | null>(null);
@@ -27,7 +29,14 @@ export default function Album() {
   const [previewUrl, setPreviewUrl] = useState('');
   const [caption, setCaption] = useState('');
   const [busy, setBusy] = useState(false);
+  const [albumShared, setAlbumShared] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    void services.auth.getProfile().then((profile) => {
+      if (profile) setAlbumShared(profile.album_shared === true);
+    });
+  }, []);
 
   useEffect(() => {
     if (!couple) return;
@@ -99,8 +108,38 @@ export default function Album() {
     notify('照片已删除', 'success');
   }
 
+  async function toggleAlbumShared(value: boolean): Promise<void> {
+    const result = await services.auth.setAlbumShared(value);
+    if (result.error || !result.data) {
+      notify(result.error?.message ?? '设置失败', 'error');
+      return;
+    }
+    setAlbumShared(value);
+    notify(value ? '已开放相册，TA 现在可以看到你上传的照片' : '已关闭相册授权，对方将看不到你上传的照片', 'success');
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <SectionCard title="相册隐私授权" subtitle="由你们双方各自控制" icon={<Lock size={20} strokeWidth={1.75} />}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>允许对方查看我的相册</Typography>
+            <Typography variant="caption" color="text.secondary">
+              开启后，TA 才能看到你上传到云端相册的照片
+            </Typography>
+          </Box>
+          <Switch checked={albumShared} onChange={(event) => void toggleAlbumShared(event.target.checked)} />
+        </Box>
+        <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid rgba(196,174,232,.18)' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {partner?.nickname ?? 'TA'} 的相册
+          </Typography>
+          <Typography variant="caption" color={partner?.album_shared ? 'success.main' : 'text.secondary'}>
+            {partner?.album_shared ? '已开放授权，可以看到 TA 上传的照片' : '尚未开放授权，TA 上传的照片暂不可见'}
+          </Typography>
+        </Box>
+      </SectionCard>
+
       <SectionCard
         title="我们的照片墙"
         subtitle={`已收藏 ${photos.length} 个瞬间`}

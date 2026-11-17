@@ -1,0 +1,64 @@
+# Supabase 后端自动部署：修改 supabase/ 下的 SQL 并 push 到 main 时执行迁移
+# 使用前：仓库 Settings → Secrets and variables → Actions 新建 Secret `SUPABASE_DB_URL`
+#   取值：Supabase 控制台 → Project Settings → Database → Connection string → URI
+#   形如 postgresql://postgres:密码@db.<ref>.supabase.co:5432/postgres?sslmode=require
+#   （密码里的特殊字符需要 URL 编码）
+# 未配置该 Secret 时工作流会安全跳过，不影响前端部署。
+name: Deploy Backend (Supabase)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-backend
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 检查 SUPABASE_DB_URL
+        id: guard
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::未配置 SUPABASE_DB_URL，跳过数据库迁移"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 安装 psql
+        if: steps.guard.outputs.skip == 'false'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: 执行后端 SQL（幂等）
+        if: steps.guard.outputs.skip == 'false'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -f supabase/setup-all.sql
+
+      - name: 回显校验结果
+        if: steps.guard.outputs.skip == 'false'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At -c "
+            select 'public_tables=' || (select count(*) from pg_tables where schemaname='public')
+                || ', pet_items=' || (select count(*) from public.pet_items)
+                || ', storage_buckets=' || (select count(*) from storage.buckets)
+                || ', rls_policies=' || (select count(*) from pg_policies where schemaname in ('public','storage'));"

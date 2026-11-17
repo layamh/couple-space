@@ -14,12 +14,9 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { brand } from '@/theme';
 import type { LocationShare } from '@/types';
 
-/** 把城市级坐标转成友好文案，不暴露精确地址。 */
+/** 把精准坐标转成友好文案。 */
 function locationLabel(lat: number, lng: number): string {
-  if (Math.abs(lat - 31.23) < 0.015 && Math.abs(lng - 121.47) < 0.015) {
-    return '上海市 · 人民广场附近';
-  }
-  return `大约位于 ${lat.toFixed(2)}°, ${lng.toFixed(2)}° 附近`;
+  return `${lat.toFixed(5)}°, ${lng.toFixed(5)}°`;
 }
 
 /** 定位共享页：双方大致位置、最后更新时间、共享开关与授权说明。 */
@@ -73,15 +70,15 @@ export default function Location() {
       return;
     }
     setLocation(result.data);
-    notify('位置已更新（城市级精度，保护隐私）', 'success');
+    notify('精准位置已更新，对方现在可以看到你的实时坐标', 'success');
   }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <SectionCard title="隐私优先的位置共享" subtitle="默认只展示城市级大致位置" icon={<ShieldCheck size={20} strokeWidth={1.75} />}>
+      <SectionCard title="精准位置共享" subtitle="GPS 级定位 · 需要授权" icon={<ShieldCheck size={20} strokeWidth={1.75} />}>
         <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-          开启后，TA 只能看到你所在的大致区域和最后更新时间，不会暴露精确门牌号。
-          只有手动点击“刷新我的位置”才会更新，不做后台持续追踪；你可以随时关闭。
+          点击「刷新我的位置」时，系统会弹出定位权限申请，选择「允许」即可共享你的 GPS 精准坐标（误差通常在 10–50 米内）。
+          只有手动刷新才会更新，不做后台持续追踪；关闭共享开关后，对方将完全看不到你的位置。
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, pt: 1.5, borderTop: '1px solid rgba(196,174,232,.18)' }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>与我共享位置</Typography>
@@ -134,7 +131,7 @@ export default function Location() {
               </Typography>
             </Box>
             <Typography variant="caption" color="text.secondary">
-              精度约 {location.accuracy ? `${Math.max(500, location.accuracy)} 米` : '1 公里'} · {lastUpdated}
+              定位精度约 {location.accuracy ? `${location.accuracy} 米` : '获取中'} · {lastUpdated}
             </Typography>
           </>
         )}
@@ -148,10 +145,10 @@ export default function Location() {
         onClick={() => void refresh()}
         startIcon={<LocateFixed size={20} strokeWidth={1.75} />}
       >
-        {busy ? '正在定位…' : '刷新我的位置'}
+        {busy ? '正在定位…' : '刷新我的位置（申请定位权限）'}
       </Button>
       <Typography variant="caption" color="text.secondary" align="center">
-        浏览器 / APK 会请求定位授权；拒绝也不影响其他功能使用
+        首次使用会弹出系统定位权限，请选择「允许」；拒绝后可到浏览器/系统设置中重新开启
       </Typography>
     </Box>
   );

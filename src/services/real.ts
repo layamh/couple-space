@@ -94,7 +94,7 @@ function storagePathFromUrl(url: string): string | null {
   return index >= 0 ? url.slice(index + marker.length) : null;
 }
 
-/** 浏览器定位统一封装：失败给出友好中文提示；坐标在调用处做城市级降级。 */
+/** 浏览器定位统一封装：开启高精度 GPS，失败给出友好中文提示。 */
 function browserPosition(): Promise<{ lat: number; lng: number; accuracy: number }> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -112,11 +112,11 @@ function browserPosition(): Promise<{ lat: number; lng: number; accuracy: number
         reject(
           new Error(
             error.code === 1
-              ? '定位权限被拒绝，请在浏览器设置中允许后再试'
-              : '暂时无法获取位置，请稍后重试',
+              ? '定位权限被拒绝，请在浏览器/系统设置中允许定位权限后再试'
+              : '暂时无法获取位置，请到开阔处重试',
           ),
         ),
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 30_000 },
     );
   });
 }
@@ -261,6 +261,21 @@ export function createRealServices(): CoupleServices {
         if (!userId) return null;
         const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
         return (data as Profile | null) ?? null;
+      },
+
+      setAlbumShared(value) {
+        return run(async (client) => {
+          const userId = await currentUserId(client);
+          if (!userId) return err<Profile>('请先登录', 'NOT_AUTHENTICATED');
+          const { data, error } = await client
+            .from('profiles')
+            .update({ album_shared: value })
+            .eq('id', userId)
+            .select('*')
+            .single();
+          if (error) return err<Profile>(friendly(error.message), 'UPDATE_PROFILE_FAILED');
+          return ok(data as Profile);
+        });
       },
 
       onAuthChange(cb) {
@@ -765,15 +780,28 @@ export function createRealServices(): CoupleServices {
 
     // ============================ Album ============================
     album: {
-      listPhotos(coupleId) {
+      async listPhotos(coupleId) {
         return run(async (client) => {
-          const { data, error } = await client
-            .from('photos')
-            .select('*')
-            .eq('couple_id', coupleId)
-            .order('created_at', { ascending: false });
+          const [{ data, error }, { data: profiles }] = await Promise.all([
+            client
+              .from('photos')
+              .select('*')
+              .eq('couple_id', coupleId)
+              .order('created_at', { ascending: false }),
+            client.from('profiles').select('id, album_shared').eq('couple_id', coupleId),
+          ]);
           if (error) return err<Photo[]>(friendly(error.message), 'LIST_PHOTOS_FAILED');
-          return ok((data ?? []) as Photo[]);
+          // 相册授权：伴侣未开放 album_shared 时，隐藏 TA 上传的照片（自己的始终可见）。
+          const sharedIds = new Set(
+            (profiles ?? [])
+              .filter((p) => p.album_shared === true)
+              .map((p) => p.id as string),
+          );
+          const userId = await currentUserId(client);
+          const visible = (data ?? []).filter(
+            (photo) => photo.uploader_id === userId || sharedIds.has(photo.uploader_id),
+          );
+          return ok(visible as Photo[]);
         });
       },
 
@@ -1023,9 +1051,9 @@ export function createRealServices(): CoupleServices {
         } catch (error) {
           return err<LocationShare>(error instanceof Error ? error.message : '定位失败');
         }
-        // 城市级精度：约 0.01°，避免暴露精确门牌号。
-        const lat = Math.round(position.lat * 100) / 100;
-        const lng = Math.round(position.lng * 100) / 100;
+        // 精准定位：保留 6 位小数（约 0.1 米），坐标精度由设备 GPS 决定。
+        const lat = Math.round(position.lat * 1e6) / 1e6;
+        const lng = Math.round(position.lng * 1e6) / 1e6;
         return run(async (client) => {
           const { data, error } = await client
             .from('locations')

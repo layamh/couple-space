@@ -22,12 +22,17 @@ npm run dev
 2. 或点「体验配对流程」→ 创建空间获得邀请码 `DEMO123` 与二维码；退出后可用「加入空间」输入 6 位邀请码完成配对。
 3. 聊天可发文字 / 表情 / 图片；相册可上传并大图预览；宠物可喂食、陪玩、摸摸并看到成长值变化；心愿可打卡并累积连续天数；悄悄话发布有撒糖动效。
 
-## 2. 真实模式（Supabase）
+## 2. 后端（Supabase）· 一键初始化
 
-1. 在 [supabase.com](https://supabase.com) 创建项目。
-2. 进入 SQL Editor，整体执行一次 `supabase/migrations/001_init.sql`（它包含 10 张表、索引、RLS、`create_couple` / `join_couple` 两个 RPC、Realtime 发布、Storage 桶，以及新用户自动建档案的 trigger）。
-3. 在 Supabase 控制台确认：`Authentication → Providers → Email` 已启用；`photos` bucket 为 public（读公开，写由 RLS 限制）；相关表已加入 `supabase_realtime` publication（SQL 已包含）。
-4. 复制 `.env.example` 为 `.env.local`，填写：
+后端代码全部在本仓库 `supabase/` 目录，随代码版本管理，无需自建服务器（GitHub Pages 只托管静态文件，跑不了常驻进程）。
+
+**最快路径：只执行一个文件**
+
+1. 在 [supabase.com](https://supabase.com) 创建项目（区域建议 Singapore）。
+2. SQL Editor → New query → 粘贴 `supabase/setup-all.sql` 全文 → Run。
+3. 左下角校验结果应显示：`public_tables=16、pet_items=34、storage_buckets=2、rls_policies=21`。
+4. Project Settings → API，复制 `Project URL` 与 `anon public` 两个值。
+5. 本地：复制 `.env.example` 为 `.env.local`，填这两个值后 `npm run dev`。
 
 ```env
 VITE_SUPABASE_URL=https://你的项目.supabase.co
@@ -35,9 +40,13 @@ VITE_SUPABASE_ANON_KEY=你的-anon-key
 VITE_BASE_PATH=
 ```
 
-5. 重新执行 `npm run dev`。两个变量都填写后自动切换为真实模式，页面不再显示演示提示。AnonKey 可公开，但数据安全由 RLS 保证；不要把 Service Role Key 写入前端。
+6. 线上：仓库 Settings → Secrets and variables → Actions，同名新建两个 Secret，然后重跑 `Deploy to GitHub Pages` 工作流。密钥由 Actions 在构建时注入，**不需要本地打包**。
 
-> 配置密钥后演示内存数据不会迁移，也不会再出现。
+配置后 App 自动从演示模式切到真实模式：注册两个账号 → 一方生成 6 位邀请码 → 另一方输入配对，聊天 / 相册 / 宠物数据两人共享。
+
+**想连后端的 SQL 也自动部署**：再加一个 Secret `SUPABASE_DB_URL`（Database → Connection string → URI），之后 push `supabase/` 下的改动会自动执行迁移，见 `.github/workflows/deploy-backend.yml`。
+
+后端细节（表结构、RLS 策略、Auth 建议）见 [`supabase/README.md`](supabase/README.md)。
 
 ## 3. 构建与部署
 
@@ -100,15 +109,16 @@ src/
   store/                # auth / app 两个 Zustand store
   components/           # Layout / Common / 守卫 / DemoBanner
   pages/                # 12 个页面
-supabase/migrations/    # 001_init.sql + 002_pet_v2.sql
+supabase/               # setup-all.sql（一键）+ migrations/ 迁移 + 后端说明
 android/ ios/           # Capacitor 双端原生工程（APK / Xcode）
 public/                 # manifest / sw / icon / assets（44 项 3D 黏土素材）
-.github/workflows/      # GitHub Pages 自动部署
+.github/workflows/      # 前端 Pages 部署 + 后端 SQL 自动迁移
 ```
 
 ## 6. 已知限制
 
 - 图片上传前在浏览器压缩到最长边 1600px、JPEG 0.8；Supabase 免费版存储配额有限，请留意用量。
-- 定位只上报城市级坐标（约 0.01°），且仅手动刷新时更新；关闭共享后对方不可见。
+- 相册照片默认仅自己可见，需在相册页打开「允许对方查看我的相册」后伴侣才可见。
+- 定位为 GPS 精准坐标（约 0.1 米精度），需用户在系统弹窗中允许定位权限；仅手动刷新时更新，关闭共享后对方不可见。
 - 提醒本期仅 App 内呈现，不含系统推送。
 - 二期可考虑：扫码插件、导出备份、纪念日系统通知、宠物自定义品种。

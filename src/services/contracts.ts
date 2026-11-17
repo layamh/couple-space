@@ -89,6 +89,8 @@ export interface AuthService {
   signOut(): Promise<Result<void>>;
   getSession(): Promise<AppSession | null>;
   getProfile(): Promise<Profile | null>;
+  /** 相册授权开关：开启后伴侣才能看到我上传的照片。 */
+  setAlbumShared(value: boolean): Promise<Result<Profile>>;
   onAuthChange(cb: (s: AppSession | null) => void): Unsubscribe;
 }
 

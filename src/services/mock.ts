@@ -1,4 +1,4 @@
-import { addDays, format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import type {
   Result,
   Unsubscribe,
@@ -80,13 +80,6 @@ function daysAgoIso(days: number, hours = 0): string {
   return new Date(Date.now() - days * 86_400_000 - hours * 3_600_000).toISOString();
 }
 
-function dateAfter(days: number): string {
-  return format(addDays(new Date(), days), 'yyyy-MM-dd');
-}
-
-const photoUrl = (id: string): string =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=80`;
-
 /** 静态 catalog：与 002_pet_v2.sql 种子及 manifest.json 的 key 完全一致。 */
 const MOCK_ITEMS: PetItem[] = [
   { key: 'bento_normal', category: 'consumable', name: '普通便当', asset_path: 'assets/pet/item/props_travel_sheet.png', slot: null, unlock_level: 1, unlock_intimacy: 0, price: 3, rarity: 'normal', sort_order: 10 },
@@ -148,208 +141,80 @@ interface MockDatabase {
 function createInitialDatabase(): MockDatabase {
   const coupleId = DEMO_COUPLE_ID;
   const session: AppSession = {
-    user: { id: DEMO_USER_ID, email: DEMO_EMAIL, nickname: '小甜' },
+    user: { id: DEMO_USER_ID, email: DEMO_EMAIL, nickname: '恋人' },
     access_token: 'demo-access-token',
   };
   const profile: Profile = {
     id: DEMO_USER_ID,
     email: DEMO_EMAIL,
-    nickname: '小甜',
+    nickname: '恋人',
     avatar_url: null,
     couple_id: null,
-    created_at: daysAgoIso(600),
+    album_shared: false,
+    created_at: new Date().toISOString(),
   };
   const partner: Profile = {
     id: DEMO_PARTNER_ID,
     email: 'partner@couple.space',
-    nickname: '小北',
+    nickname: '恋人',
     avatar_url: null,
     couple_id: null,
-    created_at: daysAgoIso(598),
+    album_shared: false,
+    created_at: new Date().toISOString(),
   };
   const couple: Couple = {
     id: coupleId,
     code: DEMO_CODE,
     partner1: DEMO_USER_ID,
     partner2: DEMO_PARTNER_ID,
-    start_date: format(subDays(new Date(), 528), 'yyyy-MM-dd'),
-    created_at: daysAgoIso(528),
+    start_date: format(new Date(), 'yyyy-MM-dd'),
+    created_at: new Date().toISOString(),
   };
 
-  const messageSeeds: Array<{
-    days: number;
-    hours: number;
-    sender: string;
-    type: MessageType;
-    content: string;
-    image?: string;
-  }> = [
-    { days: 6, hours: 3, sender: DEMO_PARTNER_ID, type: 'text', content: '早安呀～今天也要元气满满！' },
-    { days: 6, hours: 2, sender: DEMO_USER_ID, type: 'emoji', content: '🌸' },
-    { days: 4, hours: 5, sender: DEMO_USER_ID, type: 'text', content: '周末去看那家新开的甜品店好不好？' },
-    { days: 4, hours: 4, sender: DEMO_PARTNER_ID, type: 'text', content: '好呀！我预约了靠窗的位置 🍰' },
-    { days: 3, hours: 1, sender: DEMO_PARTNER_ID, type: 'image', content: '', image: photoUrl('photo-1518199266791-5375a83190b7') },
-    { days: 3, hours: 0, sender: DEMO_USER_ID, type: 'text', content: '这张照片也太好看了吧！我要存下来 💕' },
-    { days: 1, hours: 6, sender: DEMO_USER_ID, type: 'text', content: '今天下班有点晚，你先吃晚饭别等我～' },
-    { days: 1, hours: 5, sender: DEMO_PARTNER_ID, type: 'text', content: '给你留了你最爱的草莓蛋糕，回家见！' },
-    { days: 0, hours: 3, sender: DEMO_PARTNER_ID, type: 'emoji', content: '💗' },
-    { days: 0, hours: 2, sender: DEMO_USER_ID, type: 'text', content: '宠物布丁今天又长大一点点啦 🐱' },
-    { days: 0, hours: 1, sender: DEMO_PARTNER_ID, type: 'text', content: '晚上一起喂它！我买了新的小鱼干～' },
-    { days: 0, hours: 0, sender: DEMO_USER_ID, type: 'text', content: '好呀，爱你哟 ❤️' },
-  ];
-  const messages: Message[] = messageSeeds.map((seed, index) => ({
-    id: `demo-msg-${index + 1}`,
-    couple_id: coupleId,
-    sender_id: seed.sender,
-    type: seed.type,
-    content: seed.content,
-    image_url: seed.image ?? null,
-    created_at: daysAgoIso(seed.days, seed.hours),
-  }));
+  // 演示模式同样从「全空白」开始：无聊天记录、无照片、无纪念日，
+  // 与真实模式注册后的初始状态保持一致。
+  const messages: Message[] = [];
+  const photos: Photo[] = [];
+  const anniversaries: Anniversary[] = [];
+  const wishes: Wish[] = [];
+  const checkins: WishCheckin[] = [];
+  const whispers: Whisper[] = [];
+  const interactions: PetInteraction[] = [];
+  const inventory: PetInventory[] = [];
+  const postcards: Postcard[] = [];
 
   const pet: Pet = {
     id: 'demo-pet',
     couple_id: coupleId,
     name: '布丁',
     species: 'cat',
-    level: 6,
-    exp: 520,
-    mood: 78,
-    fullness: 65,
-    intimacy: 24,
-    clovers: 30,
-    stage: 'teen',
-    state: 'reading',
+    level: 1,
+    exp: 0,
+    mood: 80,
+    fullness: 60,
+    intimacy: 0,
+    clovers: 10,
+    stage: 'egg',
+    state: 'idle',
     is_traveling: false,
     travel_back_at: null,
-    clover_count: 5,
-    last_clover_at: new Date(Date.now() - 20_000).toISOString(),
-    last_decay_at: new Date(Date.now() - 10_000).toISOString(),
+    clover_count: 0,
+    last_clover_at: new Date().toISOString(),
+    last_decay_at: new Date().toISOString(),
     background: 'courtyard',
-    growth: 520,
-    last_fed_at: daysAgoIso(0, 2),
-    updated_at: daysAgoIso(0, 1),
+    growth: 0,
+    last_fed_at: null,
+    updated_at: new Date().toISOString(),
   };
-
-  const inventory: PetInventory[] = [
-    { id: 'inv-hat', couple_id: coupleId, item_key: 'hat_straw', quantity: 1, equipped: true, placed: false, pos_x: null, pos_y: null, mirrored: false, acquired_at: daysAgoIso(30) },
-    { id: 'inv-bed', couple_id: coupleId, item_key: 'bed_wood', quantity: 1, equipped: false, placed: true, pos_x: 0.5, pos_y: 0.72, mirrored: false, acquired_at: daysAgoIso(30) },
-    { id: 'inv-bow', couple_id: coupleId, item_key: 'bow_knot', quantity: 1, equipped: false, placed: false, pos_x: null, pos_y: null, mirrored: false, acquired_at: daysAgoIso(12) },
-    { id: 'inv-rug', couple_id: coupleId, item_key: 'rug_wool', quantity: 1, equipped: false, placed: false, pos_x: null, pos_y: null, mirrored: false, acquired_at: daysAgoIso(10) },
-    { id: 'inv-bento', couple_id: coupleId, item_key: 'bento_normal', quantity: 3, equipped: false, placed: false, pos_x: null, pos_y: null, mirrored: false, acquired_at: daysAgoIso(2) },
-    { id: 'inv-deluxe', couple_id: coupleId, item_key: 'bento_deluxe', quantity: 1, equipped: false, placed: false, pos_x: null, pos_y: null, mirrored: false, acquired_at: daysAgoIso(2) },
-    { id: 'inv-charm', couple_id: coupleId, item_key: 'charm', quantity: 1, equipped: false, placed: false, pos_x: null, pos_y: null, mirrored: false, acquired_at: daysAgoIso(2) },
-  ];
-
-  const postcards: Postcard[] = [
-    { id: 'pc-1', couple_id: coupleId, postcard_key: 'sakura', rarity: 'normal', count: 2, trip_id: null, obtained_at: daysAgoIso(12) },
-    { id: 'pc-2', couple_id: coupleId, postcard_key: 'lighthouse', rarity: 'rare', count: 1, trip_id: null, obtained_at: daysAgoIso(5) },
-  ];
-
-  const interactionSeeds: Array<{ actor: string; kind: PetInteraction['kind']; days: number }> = [
-    { actor: DEMO_USER_ID, kind: 'feed', days: 3 },
-    { actor: DEMO_PARTNER_ID, kind: 'play', days: 2 },
-    { actor: DEMO_USER_ID, kind: 'pat', days: 1 },
-    { actor: DEMO_PARTNER_ID, kind: 'feed', days: 1 },
-    { actor: DEMO_USER_ID, kind: 'harvest', days: 0 },
-    { actor: DEMO_PARTNER_ID, kind: 'play', days: 0 },
-  ];
-  const interactions: PetInteraction[] = interactionSeeds.map((seed, index) => ({
-    id: `demo-int-${index + 1}`,
-    couple_id: coupleId,
-    actor_id: seed.actor,
-    kind: seed.kind,
-    created_at: daysAgoIso(seed.days, 1),
-  }));
-
-  const photoSeeds: Array<{ id: string; caption: string; days: number; uploader: string }> = [
-    { id: 'photo-1518199266791-5375a83190b7', caption: '牵着你的手，就是最好的天气', days: 2, uploader: DEMO_PARTNER_ID },
-    { id: 'photo-1490750967868-88aa4486c946', caption: '春天寄来的一束花 🌷', days: 9, uploader: DEMO_USER_ID },
-    { id: 'photo-1522673607200-164d1b6ce486', caption: '我们的第一张合照', days: 18, uploader: DEMO_PARTNER_ID },
-    { id: 'photo-1509023464722-18d996393ca8', caption: '那天傍晚的晚霞特别温柔', days: 26, uploader: DEMO_USER_ID },
-    { id: 'photo-1523438885200-e635ba2c371e', caption: '一起走过的街道', days: 38, uploader: DEMO_PARTNER_ID },
-    { id: 'photo-1465495976277-4387d4b0e4a6', caption: '要一直一直在一起呀', days: 55, uploader: DEMO_USER_ID },
-    { id: 'photo-1470252649378-9c29740c9fa8', caption: '早起看日出，值了！', days: 74, uploader: DEMO_PARTNER_ID },
-    { id: 'photo-1511895426328-dc8714191300', caption: '有家人的地方就是家', days: 96, uploader: DEMO_USER_ID },
-  ];
-  const photos: Photo[] = photoSeeds.map((seed, index) => ({
-    id: `demo-photo-${index + 1}`,
-    couple_id: coupleId,
-    uploader_id: seed.uploader,
-    url: photoUrl(seed.id),
-    caption: seed.caption,
-    created_at: daysAgoIso(seed.days),
-  }));
-
-  const anniversaries: Anniversary[] = [
-    { id: 'demo-anniv-1', couple_id: coupleId, title: '恋爱纪念日', date: format(subDays(new Date(), 528), 'yyyy-MM-dd'), type: 'anniversary', created_at: daysAgoIso(528) },
-    { id: 'demo-anniv-2', couple_id: coupleId, title: '小北的生日', date: dateAfter(9), type: 'birthday', created_at: daysAgoIso(400) },
-    { id: 'demo-anniv-3', couple_id: coupleId, title: '第一次旅行', date: dateAfter(34), type: 'other', created_at: daysAgoIso(300) },
-    { id: 'demo-anniv-4', couple_id: coupleId, title: '小甜的生日', date: dateAfter(78), type: 'birthday', created_at: daysAgoIso(400) },
-    { id: 'demo-anniv-5', couple_id: coupleId, title: '在一起 1000 天', date: dateAfter(472), type: 'anniversary', created_at: daysAgoIso(100) },
-  ];
-
-  const wishSeeds: Array<{ title: string; done: boolean; creator: string }> = [
-    { title: '一起去看一次海边日出', done: false, creator: DEMO_USER_ID },
-    { title: '每天说一句“我爱你”', done: false, creator: DEMO_PARTNER_ID },
-    { title: '读完同一本书并交换心得', done: false, creator: DEMO_USER_ID },
-    { title: '学会做一道对方爱吃的菜', done: true, creator: DEMO_PARTNER_ID },
-    { title: '存钱去旅行', done: false, creator: DEMO_USER_ID },
-    { title: '一起养大宠物布丁', done: true, creator: DEMO_PARTNER_ID },
-  ];
-  const wishes: Wish[] = wishSeeds.map((seed, index) => ({
-    id: `demo-wish-${index + 1}`,
-    couple_id: coupleId,
-    title: seed.title,
-    done: seed.done,
-    created_by: seed.creator,
-    created_at: daysAgoIso(120 - index * 12),
-  }));
-
-  const checkins: WishCheckin[] = [];
-  // 心愿 1 连续 6 天、心愿 2 连续 3 天，双方交替打卡。
-  for (let i = 0; i < 6; i += 1) {
-    checkins.push({
-      id: `demo-checkin-a-${i}`,
-      wish_id: 'demo-wish-1',
-      user_id: i % 2 === 0 ? DEMO_USER_ID : DEMO_PARTNER_ID,
-      checkin_date: format(subDays(new Date(), i), 'yyyy-MM-dd'),
-    });
-  }
-  for (let i = 0; i < 3; i += 1) {
-    checkins.push({
-      id: `demo-checkin-b-${i}`,
-      wish_id: 'demo-wish-2',
-      user_id: i % 2 === 0 ? DEMO_PARTNER_ID : DEMO_USER_ID,
-      checkin_date: format(subDays(new Date(), i), 'yyyy-MM-dd'),
-    });
-  }
-
-  const whisperSeeds: Array<{ author: string; content: string; mood: MoodTag; days: number; hours: number }> = [
-    { author: DEMO_PARTNER_ID, content: '今天路过花店，看到一束粉色郁金香，第一反应是“她一定会喜欢”。', mood: 'sweet', days: 5, hours: 4 },
-    { author: DEMO_USER_ID, content: '谢谢你昨天耐心听我碎碎念，好像所有烦恼都被你抱住了。', mood: 'happy', days: 3, hours: 2 },
-    { author: DEMO_PARTNER_ID, content: '周末的阳光很好，想和你窝在沙发上看一整天的老电影。', mood: 'calm', days: 2, hours: 6 },
-    { author: DEMO_USER_ID, content: '布丁今天偷偷趴在我的键盘上睡着了，小脑袋毛茸茸的 🐾', mood: 'excited', days: 1, hours: 3 },
-    { author: DEMO_PARTNER_ID, content: '有点累，但是想到家里有你在等我，脚步就变轻了。', mood: 'sad', days: 1, hours: 1 },
-    { author: DEMO_USER_ID, content: '我们的小宇宙又长大了一天，晚安呀，梦里见。', mood: 'sweet', days: 0, hours: 2 },
-  ];
-  const whispers: Whisper[] = whisperSeeds.map((seed, index) => ({
-    id: `demo-whisper-${index + 1}`,
-    couple_id: coupleId,
-    author_id: seed.author,
-    content: seed.content,
-    mood: seed.mood,
-    created_at: daysAgoIso(seed.days, seed.hours),
-  }));
 
   const location: LocationShare = {
     couple_id: coupleId,
-    user_id: DEMO_PARTNER_ID,
-    lat: 31.23,
-    lng: 121.47,
-    accuracy: 1200,
-    sharing: true,
-    updated_at: daysAgoIso(0, 0.15),
+    user_id: DEMO_USER_ID,
+    lat: 0,
+    lng: 0,
+    accuracy: null,
+    sharing: false,
+    updated_at: new Date().toISOString(),
   };
 
   return {
@@ -496,6 +361,11 @@ export function createMockServices(): CoupleServices {
 
       async getProfile() {
         return clone(db.profile);
+      },
+
+      async setAlbumShared(value) {
+        db.profile.album_shared = value;
+        return delay(ok(clone(db.profile)));
       },
 
       onAuthChange(cb) {
@@ -830,6 +700,8 @@ export function createMockServices(): CoupleServices {
       async listPhotos(coupleId) {
         const list = db.photos
           .filter((photo) => photo.couple_id === coupleId)
+          // 与真实模式一致：伴侣未开放相册授权时，隐藏 TA 上传的照片
+          .filter((photo) => photo.uploader_id === DEMO_USER_ID || db.partner.album_shared === true)
           .sort((a, b) => b.created_at.localeCompare(a.created_at))
           .map(clone);
         return delay(ok(list));

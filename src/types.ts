@@ -23,6 +23,8 @@ export interface Profile {
   nickname: string;
   avatar_url: string | null;
   couple_id: ID | null;
+  /** 相册授权：开启后伴侣才能看到我上传的照片；默认关闭。 */
+  album_shared?: boolean | null;
   created_at: ISODate;
 }
 
