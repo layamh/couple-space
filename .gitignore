@@ -1,0 +1,16 @@
+node_modules
+dist
+.env
+.env.local
+.env.*.local
+android-build
+.vite
+*.log
+.DS_Store
+coverage
+
+# Capacitor 原生构建产物（工程本身需提交）
+android/app/build
+android/.gradle
+ios/App/App/public
+ios/App/Pods

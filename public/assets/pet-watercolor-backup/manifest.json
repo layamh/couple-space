@@ -1,0 +1,60 @@
+{
+  "_readme": "宠物素材清单。前端按 key 取 path，缺失时回退占位块。路径相对 public/ 根，拼 VITE_BASE_PATH 使用。",
+  "style": "日系治愈水彩绘本，低饱和暖色，透明底 PNG（角色/服饰/家具/道具），场景与明信片为不透明 JPG。",
+  "character": {
+    "egg":         { "path": "assets/pet/character/cat_egg.png",           "anchor": "center", "desc": "蛋期·蛋中睡觉" },
+    "baby":        { "path": "assets/pet/character/cat_baby.png",          "anchor": "center", "desc": "幼年·大头短爪" },
+    "teen":        { "path": "assets/pet/character/cat_teen.png",          "anchor": "center", "desc": "少年·标准坐姿（基准）" },
+    "adult":       { "path": "assets/pet/character/cat_adult.png",         "anchor": "center", "desc": "成年·慵懒眯眼带叶" },
+    "reading":     { "path": "assets/pet/character/cat_reading.png",       "anchor": "center", "desc": "看书" },
+    "sleeping":    { "path": "assets/pet/character/cat_sleeping.png",      "anchor": "center", "desc": "趴睡" },
+    "eating":      { "path": "assets/pet/character/cat_eating.png",        "anchor": "center", "desc": "吃饭" },
+    "idle":        { "path": "assets/pet/character/cat_idle.png",          "anchor": "center", "desc": "发呆望窗" },
+    "writing":     { "path": "assets/pet/character/cat_writing.png",       "anchor": "center", "desc": "写信" },
+    "happy":       { "path": "assets/pet/character/cat_happy.png",         "anchor": "center", "desc": "开心" },
+    "travel":      { "path": "assets/pet/character/cat_travel.png",        "anchor": "center", "desc": "背包出发" },
+    "travel_return":{ "path": "assets/pet/character/cat_travel_return.png","anchor": "center", "desc": "旅行归来" }
+  },
+  "background": {
+    "courtyard": { "path": "assets/pet/background/bg_courtyard.jpg", "desc": "庭院小窝（默认）" },
+    "starry":    { "path": "assets/pet/background/bg_starry.jpg",    "desc": "星空夜晚" },
+    "seaside":   { "path": "assets/pet/background/bg_seaside.jpg",   "desc": "海边木廊" },
+    "bedroom":   { "path": "assets/pet/background/bg_bedroom.jpg",   "desc": "卧室角落" },
+    "garden":    { "path": "assets/pet/background/bg_garden.jpg",    "desc": "花园小径" }
+  },
+  "outfit": {
+    "hat_straw":    { "path": "assets/pet/outfit/hat_straw.png",    "slot": "head",  "anchor": "top",   "desc": "草帽" },
+    "hat_beanie":   { "path": "assets/pet/outfit/hat_beanie.png",   "slot": "head",  "anchor": "top",   "desc": "针织帽" },
+    "flower_crown": { "path": "assets/pet/outfit/flower_crown.png", "slot": "head",  "anchor": "top",   "desc": "花环" },
+    "bow_knot":     { "path": "assets/pet/outfit/bow_knot.png",     "slot": "neck",  "anchor": "neck",  "desc": "粉蝴蝶结" },
+    "bow_tie":      { "path": "assets/pet/outfit/bow_tie.png",      "slot": "neck",  "anchor": "neck",  "desc": "薄荷领结" },
+    "scarf_knit":   { "path": "assets/pet/outfit/scarf_knit.png",   "slot": "neck",  "anchor": "neck",  "desc": "针织围巾" },
+    "glasses_round":{ "path": "assets/pet/outfit/glasses_round.png","slot": "eyes",  "anchor": "eyes",  "desc": "圆框眼镜" },
+    "sunglasses":   { "path": "assets/pet/outfit/sunglasses.png",   "slot": "eyes",  "anchor": "eyes",  "desc": "墨镜" }
+  },
+  "furniture": {
+    "bed_wood":   { "path": "assets/pet/furniture/bed_wood.png",   "desc": "小木床" },
+    "rug_wool":   { "path": "assets/pet/furniture/rug_wool.png",   "desc": "毛线地毯" },
+    "plant_pot":  { "path": "assets/pet/furniture/plant_pot.png",  "desc": "绿植盆栽" },
+    "bookshelf":  { "path": "assets/pet/furniture/bookshelf.png",  "desc": "小书架" },
+    "toy_ball":   { "path": "assets/pet/furniture/toy_ball.png",   "desc": "毛线球玩具" },
+    "lantern":    { "path": "assets/pet/furniture/lantern.png",    "desc": "纸灯笼" },
+    "tea_table":  { "path": "assets/pet/furniture/tea_table.png",  "desc": "茶几" },
+    "swing":      { "path": "assets/pet/furniture/swing.png",      "desc": "秋千" }
+  },
+  "postcard": {
+    "sakura":     { "path": "assets/pet/postcard/pc_sakura.jpg",     "rarity": "common", "desc": "樱花树下" },
+    "lighthouse": { "path": "assets/pet/postcard/pc_lighthouse.jpg", "rarity": "rare",   "desc": "海边灯塔" },
+    "onsen":      { "path": "assets/pet/postcard/pc_onsen.jpg",      "rarity": "common", "desc": "山间温泉" },
+    "shrine":     { "path": "assets/pet/postcard/pc_shrine.jpg",     "rarity": "rare",   "desc": "神社鸟居" },
+    "bamboo":     { "path": "assets/pet/postcard/pc_bamboo.jpg",     "rarity": "common", "desc": "竹林小径" },
+    "snow":       { "path": "assets/pet/postcard/pc_snow.jpg",       "rarity": "rare",   "desc": "雪山" },
+    "town":       { "path": "assets/pet/postcard/pc_town.jpg",       "rarity": "common", "desc": "古城街道" },
+    "starry":     { "path": "assets/pet/postcard/pc_starry_grassland.jpg","rarity": "rare","desc": "星空草原" }
+  },
+  "item": {
+    "clover_patch":      { "path": "assets/pet/item/clover_patch.png",      "desc": "三叶草丛（收割）" },
+    "props_travel_sheet":{ "path": "assets/pet/item/props_travel_sheet.png","slices": 3, "desc": "旅行道具精灵图：普通便当/豪华便当/护身符" },
+    "souvenir_parcel":   { "path": "assets/pet/item/souvenir_parcel.png",   "desc": "土特产包裹" }
+  }
+}

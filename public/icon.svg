@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Couple Space">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F48FB1"/>
+      <stop offset="55%" stop-color="#EC6E9C"/>
+      <stop offset="100%" stop-color="#B39DDB"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="192" cy="190" r="30" fill="#ffffff" opacity="0.92"/>
+  <circle cx="320" cy="190" r="30" fill="#ffffff" opacity="0.92"/>
+  <path d="M256 350 C 200 306, 142 266, 142 214 C 142 178, 170 152, 204 152 C 228 152, 246 165, 256 184 C 266 165, 284 152, 308 152 C 342 152, 370 178, 370 214 C 370 266, 312 306, 256 350 Z" fill="#ffffff"/>
+  <path d="M176 404 Q 256 448 336 404" stroke="#ffffff" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.72"/>
+</svg>

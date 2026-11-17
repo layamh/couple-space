@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* 黏土马卡龙色板（PRD §3.2） */
+  --clay-pink: #F4A6C1;
+  --clay-pink-deep: #E983A8;
+  --clay-lavender: #C4AEE8;
+  --clay-lavender-deep: #A98AD8;
+  --clay-apricot: #FFD9AE;
+  --clay-mint: #BFE6D6;
+  --clay-cream: #FFF8F1;
+  --clay-base: #FBE9EF;
+  --clay-ink: #5A4653;
+  --clay-ink-soft: #947F8F;
+  --clay-hi: rgba(255, 255, 255, .72);
+  --clay-base-edge: #EFB9CD;
+  --clay-btn-edge: #D9668F;
+  --clay-shadow: rgba(120, 80, 100, .22);
+
+  /* 圆角 token */
+  --clay-r-xs: 10px;
+  --clay-r-sm: 14px;
+  --clay-r-md: 20px;
+  --clay-r-lg: 28px;
+  --clay-r-pill: 999px;
+
+  /* 三层黏土投影 */
+  --clay-shadow-card: inset 0 2px 0 rgba(255, 255, 255, .75), inset 0 -1px 0 rgba(120, 80, 100, .05), 0 8px 0 var(--clay-base-edge), 0 16px 24px -8px var(--clay-shadow);
+  --clay-shadow-btn: inset 0 2px 1px rgba(255, 255, 255, .55), 0 6px 0 var(--clay-btn-edge), 0 12px 18px -6px rgba(233, 131, 168, .5);
+  --clay-shadow-input: inset 0 2px 5px rgba(120, 80, 100, .12), inset 0 -1px 0 rgba(255, 255, 255, .6);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--clay-base);
+  background-image:
+    radial-gradient(circle at 10% 6%, rgba(255, 217, 174, .55), transparent 42%),
+    radial-gradient(circle at 90% 18%, rgba(196, 174, 232, .42), transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(244, 166, 193, .28), transparent 55%);
+  background-attachment: fixed;
+  color: var(--clay-ink);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(233, 131, 168, .42);
+  border-radius: var(--clay-r-pill);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ===== 黏土 CSS 工具类（DESIGN §3.2） ===== */
+.clay-card {
+  border-radius: var(--clay-r-md);
+  background: linear-gradient(145deg, #FFFDFB 0%, var(--clay-cream) 100%);
+  box-shadow: var(--clay-shadow-card);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.clay-card--lg {
+  border-radius: var(--clay-r-lg);
+}
+
+.clay-btn {
+  border: 0;
+  border-radius: var(--clay-r-pill);
+  color: #fff;
+  background: linear-gradient(145deg, #F7B4CC 0%, #EC7FA6 60%, #C4AEE8 130%);
+  box-shadow: var(--clay-shadow-btn);
+}
+
+.clay-btn:disabled {
+  filter: saturate(.5);
+  box-shadow: none;
+  opacity: .6;
+}
+
+.clay-input {
+  border-radius: 16px;
+  background: #FFF9F4;
+  box-shadow: var(--clay-shadow-input);
+}
+
+.clay-input:focus-within {
+  box-shadow: inset 0 2px 5px rgba(120, 80, 100, .10), 0 0 0 3px rgba(244, 166, 193, .28);
+}
+
+.clay-chip {
+  border-radius: var(--clay-r-pill);
+  box-shadow: inset 0 1.5px 0 var(--clay-hi), 0 3px 0 var(--clay-base-edge);
+}
+
+.clay-tray {
+  background: linear-gradient(180deg, #FFFDFB 0%, var(--clay-cream) 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .85), 0 -3px 0 var(--clay-base-edge), 0 -12px 28px -10px rgba(120, 80, 100, .28);
+}
+
+.clay-icon {
+  border-radius: var(--clay-r-sm);
+  display: grid;
+  place-items: center;
+  transition: transform .15s ease-out, box-shadow .15s ease-out;
+}
+
+.clay-icon--on {
+  transform: translateY(2px);
+}
+
+.clay-pressable {
+  transition: transform .15s ease-out, box-shadow .15s ease-out;
+}
+
+.clay-pressable:active {
+  transform: translateY(6px) scale(.97) !important;
+}
+
+.clay-jelly {
+  animation: clay-jelly .52s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+@media (hover: hover) {
+  .clay-pressable:hover:not(:active) {
+    transform: translateY(-2px);
+  }
+}
+
+/* ===== 黏土动效关键帧（PRD §3.7） ===== */
+@keyframes clay-press {
+  to { transform: translateY(6px) scale(.97); }
+}
+
+@keyframes clay-release {
+  0% { transform: translateY(6px) scale(.97); }
+  60% { transform: translateY(-2px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes clay-jelly {
+  0% { transform: scale(1, 1); }
+  30% { transform: scale(1.08, .92); }
+  55% { transform: scale(.96, 1.04); }
+  75% { transform: scale(1.03, .98); }
+  100% { transform: scale(1, 1); }
+}
+
+@keyframes clay-hover {
+  to { transform: translateY(-2px); }
+}
+
+/* ===== 撒糖 / 漂浮微动效（换黏土色） ===== */
+.candy-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.candy-particle {
+  position: absolute;
+  top: -16px;
+  animation: candy-fall 1.7s ease-in forwards;
+  will-change: transform, opacity;
+}
+
+.heart-float {
+  position: absolute;
+  animation: heart-float 1.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes candy-fall {
+  0% { transform: translateY(-20px) rotate(0deg) scale(.7); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(280px) rotate(280deg) scale(1.1); opacity: 0; }
+}
+
+@keyframes heart-float {
+  0% { transform: translateY(0) scale(.7); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-90px) scale(1.25); opacity: 0; }
+}
+
+@keyframes pet-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-14px) scale(1.06); }
+  60% { transform: translateY(0) scale(.96); }
+}
+
+.pet-bounce {
+  animation: pet-bounce .7s ease-in-out;
+}
+
+@keyframes soft-pulse {
+  0%, 100% { transform: scale(1); opacity: .5; }
+  50% { transform: scale(1.2); opacity: .12; }
+}
+
+.soft-pulse {
+  animation: soft-pulse 2.4s ease-in-out infinite;
+}
+
+/* ===== Pet v2 治愈系动效：换装淡入 / 旅行柔光 / 三叶草生长 / 归来弹入 / 家具吸附（仅换黏土色） ===== */
+@keyframes outfit-in {
+  0% { opacity: 0; transform: scale(.86) translateY(4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes travel-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 217, 174, .35); transform: scale(1); }
+  50% { box-shadow: 0 0 18px 6px rgba(255, 217, 174, .5); transform: scale(1.04); }
+}
+
+@keyframes clover-grow {
+  0% { transform: scale(.4) translateY(8px) rotate(-8deg); opacity: 0; }
+  60% { transform: scale(1.08) translateY(-2px) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) translateY(0) rotate(0); opacity: 1; }
+}
+
+.clover-grow {
+  transform-origin: bottom center;
+  animation: clover-grow .55s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+@keyframes card-pop-in {
+  0% { transform: scale(.82) translateY(18px); opacity: 0; }
+  70% { transform: scale(1.03) translateY(-3px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.card-pop-in {
+  animation: card-pop-in .5s cubic-bezier(.34, 1.4, .64, 1);
+}
+
+@keyframes furniture-drop {
+  0% { transform: scale(1.12); filter: brightness(1.08); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+.furniture-drop {
+  animation: furniture-drop .28s ease-out;
+}
+
+/* MUI 细节微调：黏土按压手感（厚度边收窄由 theme.ts 的 :active box-shadow 负责） */
+.MuiButton-root,
+.MuiIconButton-root,
+.MuiCardActionArea-root {
+  transition: transform .15s ease-out, box-shadow .15s ease-out, background-color .18s ease !important;
+}
+
+.MuiButton-root:active,
+.MuiIconButton-root:active,
+.MuiCardActionArea-root:active {
+  transform: translateY(4px) scale(.97) !important;
+}
+
+.MuiDialog-paper {
+  border-radius: var(--clay-r-lg) !important;
+}
+
+/* 全局尊重系统减少动效：只保留透明度过渡 */
+@media (prefers-reduced-motion: reduce) {
+  .clay-pressable,
+  .clay-pressable:active,
+  .clay-jelly,
+  .candy-particle,
+  .heart-float,
+  .pet-bounce,
+  .soft-pulse,
+  .clover-grow,
+  .card-pop-in,
+  .furniture-drop,
+  .MuiButton-root,
+  .MuiIconButton-root,
+  .MuiCardActionArea-root {
+    animation: none !important;
+    transition: opacity .15s ease !important;
+    transform: none !important;
+  }
+}

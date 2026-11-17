@@ -1,0 +1,95 @@
+classDiagram
+    class Result~T~ {
+        +T data
+        +AppError error
+    }
+    class Profile {
+        +ID id
+        +string email
+        +string nickname
+        +ID couple_id
+    }
+    class Couple {
+        +ID id
+        +string code
+        +ID partner1
+        +ID partner2
+        +string start_date
+    }
+    class Message {
+        +ID id
+        +ID couple_id
+        +MessageType type
+        +string content
+        +string image_url
+    }
+    class Pet {
+        +ID id
+        +int growth
+        +int mood
+        +PetStage stage
+        +feed() Pet
+    }
+    class Photo { +ID id +string url }
+    class Anniversary { +ID id +string date +AnniversaryType type }
+    class Wish { +ID id +boolean done }
+    class WishCheckin { +ID wish_id +string checkin_date }
+    class Whisper { +ID id +MoodTag mood +string content }
+    class LocationShare { +number lat +number lng +boolean sharing }
+
+    class CoupleServices {
+        +AuthService auth
+        +PairingService pairing
+        +ChatService chat
+        +PetService pet
+        +AlbumService album
+        +AnniversaryService anniversary
+        +WishService wish
+        +WhisperService whisper
+        +LocationService location
+    }
+    class ServiceFactory {
+        +boolean isDemoMode
+        +createServices(mode) CoupleServices
+    }
+    class RealServices {
+        +SupabaseClient client
+        +rpc() Result
+    }
+    class MockServices {
+        +Map~string, any~ memory
+        +Set~Function~ listeners
+        +broadcast(event) void
+    }
+    class UseAuthStore {
+        +AppSession session
+        +signIn() void
+        +signOut() void
+    }
+    class UseAppStore {
+        +Couple couple
+        +boolean demoMode
+        +setCouple() void
+        +notify() void
+    }
+    class ProtectedRoute {
+        +check(session, couple) boolean
+    }
+
+    Couple "1" -- "0..2" Profile : 成员
+    Couple "1" -- "0..*" Message : 包含
+    Couple "1" -- "1" Pet : 饲养
+    Couple "1" -- "0..*" Photo : 相册
+    Couple "1" -- "0..*" Anniversary : 纪念日
+    Couple "1" -- "0..*" Wish : 心愿
+    Wish "1" -- "0..*" WishCheckin : 打卡
+    Couple "1" -- "0..*" Whisper : 留言
+    Couple "1" -- "0..1" LocationShare : 定位
+
+    ServiceFactory ..> CoupleServices : 创建
+    RealServices ..|> CoupleServices : 实现
+    MockServices ..|> CoupleServices : 实现
+    UseAuthStore --> CoupleServices : 调用 auth
+    UseAppStore --> CoupleServices : 调用 pairing
+    ProtectedRoute --> UseAuthStore : 读取
+    ProtectedRoute --> UseAppStore : 读取

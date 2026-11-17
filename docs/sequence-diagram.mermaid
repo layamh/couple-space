@@ -1,0 +1,34 @@
+sequenceDiagram
+    actor U as 用户A
+    participant C as Chat.tsx
+    participant S as services.chat (real.ts)
+    participant SB as Supabase
+    participant DB as Postgres
+    participant R as Realtime 频道
+    participant C2 as 用户B Chat.tsx
+
+    Note over C,R: ① 进入聊天页：建立订阅 + 拉历史兜底
+    C->>S: subscribeMessages(coupleId, cb)
+    S->>SB: channel('chat:').on('postgres_changes', INSERT)
+    SB-->>R: 订阅成功
+    C->>S: listMessages(coupleId, 50)
+    S->>DB: select * where couple_id order by created_at desc limit 50
+    DB-->>S: Message[]
+    S-->>C: Result<Message[]>（倒序转正在 UI）
+    Note right of C: 先拉历史再接增量，断线重连不丢消息
+
+    Note over U,DB: ② 发送消息
+    U->>C: 输入文字/表情/图片
+    alt 图片消息
+        C->>S: uploadImage(coupleId, file)
+        S->>SB: storage.from('photos').upload(coupleId/uuid.jpg)
+        SB-->>S: 公开 URL
+    end
+    C->>S: sendMessage({coupleId, type, content, imageUrl})
+    S->>DB: insert into messages
+    DB-->>R: INSERT 事件（RLS 过滤）
+    R-->>C2: payload.new → cb(Message)
+    C2->>C2: append 到消息列表并排序、滚动到底部
+    DB-->>S: 返回插入行
+    S-->>C: Result<Message>（乐观去重：按 id 合并）
+    C->>C: 按 id upsert，避免本地+Realtime 重复
